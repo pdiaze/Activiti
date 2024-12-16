@@ -60,7 +60,7 @@ public class ActivitiSpringCacheManagerProperties {
     }
 
     public static class CaffeineCacheProviderProperties {
-        private boolean allowNullValues = false;
+        private boolean allowNullValues = true;
 
         private String defaultSpec = "";
 

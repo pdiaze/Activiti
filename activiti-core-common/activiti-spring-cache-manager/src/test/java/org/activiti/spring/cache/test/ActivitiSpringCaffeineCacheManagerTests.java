@@ -57,7 +57,7 @@ public class ActivitiSpringCaffeineCacheManagerTests {
 
     @Test
     void testAllowNullValues() {
-        assertThat(CaffeineCacheManager.class.cast(cacheManager).isAllowNullValues()).isFalse();
+        assertThat(CaffeineCacheManager.class.cast(cacheManager).isAllowNullValues()).isTrue();
     }
 
     @Test

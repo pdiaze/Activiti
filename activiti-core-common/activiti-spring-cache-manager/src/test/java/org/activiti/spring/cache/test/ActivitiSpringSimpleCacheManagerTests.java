@@ -67,6 +67,12 @@ public class ActivitiSpringSimpleCacheManagerTests {
         assertThat(cache).isInstanceOf(ConcurrentMapCache.class);
     }
 
+
+    @Test
+    void testAllowNullValues() {
+        assertThat(ConcurrentMapCache.class.cast(cacheManager).isAllowNullValues()).isTrue();
+    }
+
     @Test
     void springCacheType() {
         assertThat(springCacheType).isEqualTo(CacheType.SIMPLE);
