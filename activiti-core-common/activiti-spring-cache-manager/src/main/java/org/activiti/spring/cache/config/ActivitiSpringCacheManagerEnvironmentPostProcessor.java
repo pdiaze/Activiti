@@ -30,7 +30,7 @@ import org.springframework.core.env.MapPropertySource;
 public class ActivitiSpringCacheManagerEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     protected static final String ACTIVITI_SPRING_CACHE_MANAGER_PROVIDER_KEY = "activiti.spring.cache-manager.provider";
-    protected static final String SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY = "spring.cache.type";
+    protected static final String SPRING_CACHE_TYPE_KEY = "spring.cache.type";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -50,7 +50,7 @@ public class ActivitiSpringCacheManagerEnvironmentPostProcessor implements Envir
 
     private Map<String, Object> resolvePropertiesToSet(CacheProvider messagingBroker) {
         Map<String, Object> extraProperties = new HashMap<>();
-        extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveCacheType(messagingBroker));
+        extraProperties.put(SPRING_CACHE_TYPE_KEY, resolveCacheType(messagingBroker));
 
         return extraProperties;
     }
