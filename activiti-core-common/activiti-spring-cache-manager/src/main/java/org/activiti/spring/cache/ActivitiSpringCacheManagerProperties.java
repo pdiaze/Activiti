@@ -18,6 +18,7 @@ package org.activiti.spring.cache;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("activiti.spring.cache-manager")
@@ -31,9 +32,13 @@ public class ActivitiSpringCacheManagerProperties {
 
     private boolean enabled = true;
 
-    private CacheProvider provider;
+    private CacheProvider provider = CacheProvider.caffeine;
 
-    private CaffeineCacheProviderProperties caffeine;
+    private final Map<String, ActivitiCacheProperties> caches = new LinkedHashMap<>();
+
+    private CaffeineCacheProviderProperties caffeine = new CaffeineCacheProviderProperties();
+
+    private SimpleCacheProviderProperties simple = new SimpleCacheProviderProperties();
 
     public boolean isEnabled() {
         return enabled;
@@ -51,12 +56,47 @@ public class ActivitiSpringCacheManagerProperties {
         this.provider = provider;
     }
 
+    public Map<String, ActivitiCacheProperties> getCaches() {
+        return caches;
+    }
+
     public CaffeineCacheProviderProperties getCaffeine() {
         return caffeine;
     }
 
+    public SimpleCacheProviderProperties getSimple() {
+        return simple;
+    }
+
     public void setCaffeine(CaffeineCacheProviderProperties caffeine) {
         this.caffeine = caffeine;
+    }
+
+    public void setSimple(SimpleCacheProviderProperties simple) {
+        this.simple = simple;
+    }
+
+    public static class ActivitiCacheProperties {
+
+        private boolean enabled = true;
+
+        private CacheProperties.Caffeine caffeine = new CacheProperties.Caffeine();
+
+        public CacheProperties.Caffeine getCaffeine() {
+            return this.caffeine;
+        }
+
+        public void setCaffeine(CacheProperties.Caffeine caffeine) {
+            this.caffeine = caffeine;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
     }
 
     public static class CaffeineCacheProviderProperties {
@@ -64,28 +104,26 @@ public class ActivitiSpringCacheManagerProperties {
 
         private String defaultSpec = "";
 
-        private Map<String, CaffeineCacheSpec> caches = new LinkedHashMap<>();
-
-        public static class CaffeineCacheSpec {
-            private boolean enabled = true;
-            private String spec = "";
-
-            public String getSpec() {
-                return spec;
-            }
-
-            public void setSpec(String spec) {
-                this.spec = spec;
-            }
-
-            public boolean isEnabled() {
-                return enabled;
-            }
-
-            public void setEnabled(boolean enabled) {
-                this.enabled = enabled;
-            }
+        public boolean isAllowNullValues() {
+            return allowNullValues;
         }
+
+        public String getDefaultSpec() {
+            return defaultSpec;
+        }
+
+        public void setAllowNullValues(boolean allowNullValues) {
+            this.allowNullValues = allowNullValues;
+        }
+
+        public void setDefaultSpec(String defaultSpec) {
+            this.defaultSpec = defaultSpec;
+        }
+
+    }
+
+    public static class SimpleCacheProviderProperties {
+        private boolean allowNullValues = true;
 
         public boolean isAllowNullValues() {
             return allowNullValues;
@@ -95,20 +133,6 @@ public class ActivitiSpringCacheManagerProperties {
             this.allowNullValues = allowNullValues;
         }
 
-        public Map<String, CaffeineCacheSpec> getCaches() {
-            return caches;
-        }
-
-        public void setCaches(Map<String, CaffeineCacheSpec> caches) {
-            this.caches = caches;
-        }
-
-        public String getDefaultSpec() {
-            return defaultSpec;
-        }
-
-        public void setDefaultSpec(String defaultSpec) {
-            this.defaultSpec = defaultSpec;
-        }
     }
+
 }

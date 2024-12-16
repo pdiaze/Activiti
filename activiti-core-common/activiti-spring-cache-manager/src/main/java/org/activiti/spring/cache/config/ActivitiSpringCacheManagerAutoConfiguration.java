@@ -47,11 +47,11 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
         return cacheManager -> {
             List<String> cacheNames = new ArrayList<>();
 
-            var cacheProperties = properties.getCaffeine();
+            var cacheProperties = properties.getSimple();
 
             cacheManager.setAllowNullValues(cacheProperties.isAllowNullValues());
 
-            cacheProperties.getCaches()
+            properties.getCaches()
                 .entrySet()
                 .stream()
                 .filter(it -> it.getValue().isEnabled())
@@ -72,12 +72,12 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
             cacheManager.setCaffeineSpec(CaffeineSpec.parse(caffeineCacheProperties.getDefaultSpec()));
             cacheManager.setAllowNullValues(caffeineCacheProperties.isAllowNullValues());
 
-            caffeineCacheProperties.getCaches()
+            properties.getCaches()
                 .entrySet()
                 .stream()
                 .filter(it -> it.getValue().isEnabled())
                 .forEach(cacheEntry -> {
-                    Cache<Object, Object> cache = Caffeine.from(cacheEntry.getValue().getSpec()).build();
+                    Cache<Object, Object> cache = Caffeine.from(cacheEntry.getValue().getCaffeine().getSpec()).build();
 
                     cacheManager.registerCustomCache(cacheEntry.getKey(), cache);
                 });

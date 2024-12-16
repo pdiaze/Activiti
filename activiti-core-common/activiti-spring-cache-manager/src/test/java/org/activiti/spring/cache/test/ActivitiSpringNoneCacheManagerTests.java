@@ -29,7 +29,7 @@ import org.springframework.cache.support.NoOpCacheManager;
 
 @SpringBootTest(
     properties = {
-        "debug=true",
+        "debug=false",
         "activiti.spring.cache-manager.provider=none",
 })
 public class ActivitiSpringNoneCacheManagerTests {

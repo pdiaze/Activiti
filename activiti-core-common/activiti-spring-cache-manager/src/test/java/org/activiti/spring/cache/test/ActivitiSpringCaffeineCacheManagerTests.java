@@ -30,12 +30,12 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 
 @SpringBootTest(
     properties = {
-        "debug=true",
+        "debug=false",
         "activiti.spring.cache-manager.provider=caffeine",
-        "activiti.spring.cache-manager.caffeine.caches.foo.enabled=true",
-        "activiti.spring.cache-manager.caffeine.caches.foo.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
-        "activiti.spring.cache-manager.caffeine.caches.bar.enabled=false",
-        "activiti.spring.cache-manager.caffeine.caches.bar.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
+        "activiti.spring.cache-manager.caffeine.allow-null-values=true",
+        "activiti.spring.cache-manager.caches.foo.caffeine.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
+        "activiti.spring.cache-manager.caches.bar.enabled=false",
+        "activiti.spring.cache-manager.caches.bar.caffeine.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
 })
 public class ActivitiSpringCaffeineCacheManagerTests {
 
