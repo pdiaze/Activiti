@@ -70,7 +70,7 @@ public class ActivitiSpringSimpleCacheManagerTests {
 
     @Test
     void testAllowNullValues() {
-        assertThat(ConcurrentMapCache.class.cast(cacheManager).isAllowNullValues()).isTrue();
+        assertThat(ConcurrentMapCacheManager.class.cast(cacheManager).isAllowNullValues()).isTrue();
     }
 
     @Test
