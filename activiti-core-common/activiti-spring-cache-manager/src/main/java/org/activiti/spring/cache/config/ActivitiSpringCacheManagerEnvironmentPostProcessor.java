@@ -50,15 +50,16 @@ public class ActivitiSpringCacheManagerEnvironmentPostProcessor implements Envir
 
     private Map<String, Object> resolvePropertiesToSet(CacheProvider messagingBroker) {
         Map<String, Object> extraProperties = new HashMap<>();
-        extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveDefaultBinder(messagingBroker));
+        extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveCacheType(messagingBroker));
 
         return extraProperties;
     }
 
-    private CacheType resolveDefaultBinder(CacheProvider cacheProvider) {
+    private CacheType resolveCacheType(CacheProvider cacheProvider) {
         return switch (cacheProvider) {
             case simple -> CacheType.SIMPLE;
-            default -> CacheType.CAFFEINE;
+            case caffeine -> CacheType.CAFFEINE;
+            default -> CacheType.NONE;
         };
     }
 }

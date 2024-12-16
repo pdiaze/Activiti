@@ -19,6 +19,9 @@ package org.activiti.spring.cache.config;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -28,6 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 
@@ -36,6 +40,27 @@ import org.springframework.context.annotation.PropertySource;
 @EnableConfigurationProperties({ActivitiSpringCacheManagerProperties.class})
 @PropertySource("classpath:config/activiti-spring-cache-manager.properties")
 public class ActivitiSpringCacheManagerAutoConfiguration {
+
+    @Bean
+    @ConditionalOnProperty(value = "activiti.spring.cache-manager.provider", havingValue = "simple")
+    public CacheManagerCustomizer<ConcurrentMapCacheManager> activitiSpringSimpleCacheManagerCustomizer(ActivitiSpringCacheManagerProperties properties) {
+        return cacheManager -> {
+            List<String> cacheNames = new ArrayList<>();
+
+            var cacheProperties = properties.getCaffeine();
+
+            cacheManager.setAllowNullValues(cacheProperties.isAllowNullValues());
+
+            cacheProperties.getCaches()
+                .entrySet()
+                .stream()
+                .filter(it -> it.getValue().isEnabled())
+                .map(Map.Entry::getKey)
+                .forEach(cacheNames::add);
+
+            cacheManager.setCacheNames(cacheNames);
+        };
+    }
 
     @Bean
     @ConditionalOnClass(CaffeineCacheManager.class)
@@ -52,11 +77,9 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
                 .stream()
                 .filter(it -> it.getValue().isEnabled())
                 .forEach(cacheEntry -> {
-                    Cache<Object, Object> cache = Caffeine.from(cacheEntry.getValue()
-                            .getSpec())
-                        .build();
-                    cacheManager.registerCustomCache(cacheEntry.getKey(),
-                        cache);
+                    Cache<Object, Object> cache = Caffeine.from(cacheEntry.getValue().getSpec()).build();
+
+                    cacheManager.registerCustomCache(cacheEntry.getKey(), cache);
                 });
         };
     }

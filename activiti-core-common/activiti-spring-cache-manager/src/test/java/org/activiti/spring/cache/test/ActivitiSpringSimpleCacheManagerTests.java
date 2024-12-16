@@ -25,19 +25,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
 @SpringBootTest(
     properties = {
         "debug=true",
+        "activiti.spring.cache-manager.provider=simple",
         "activiti.spring.cache-manager.caffeine.caches.foo.enabled=true",
         "activiti.spring.cache-manager.caffeine.caches.foo.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
         "activiti.spring.cache-manager.caffeine.caches.bar.enabled=false",
         "activiti.spring.cache-manager.caffeine.caches.bar.spec=initialCapacity=100, maximumSize=1000, expireAfterAccess=60s, recordStats",
 })
-@SpringBootApplication
-public class ActivitiSpringCacheManagerTests {
+public class ActivitiSpringSimpleCacheManagerTests {
+
+    @SpringBootApplication
+    static class TestApplication {}
 
     @Autowired(required = false)
     private CacheManager cacheManager;
@@ -49,29 +52,24 @@ public class ActivitiSpringCacheManagerTests {
     void testCacheManager() {
         assertThat(cacheManager)
             .isNotNull()
-            .isInstanceOf(CaffeineCacheManager.class);
+            .isInstanceOf(ConcurrentMapCacheManager.class);
     }
 
     @Test
-    void testAllowNullValues() {
-        assertThat(CaffeineCacheManager.class.cast(cacheManager).isAllowNullValues()).isFalse();
-    }
-
-    @Test
-    void testCaffeineCacheManager() {
+    void testSimpleCacheManager() {
         assertThat(cacheManager.getCacheNames()).containsExactly("foo");
     }
 
     @Test
-    void testCaffeineCaches() {
+    void testCaches() {
         var cache = cacheManager.getCache("foo");
 
-        assertThat(cache).isInstanceOf(CaffeineCache.class);
+        assertThat(cache).isInstanceOf(ConcurrentMapCache.class);
     }
 
     @Test
     void springCacheType() {
-        assertThat(springCacheType).isEqualTo(CacheType.CAFFEINE);
+        assertThat(springCacheType).isEqualTo(CacheType.SIMPLE);
     }
 
 }
