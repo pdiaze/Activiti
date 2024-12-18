@@ -18,17 +18,19 @@ package org.activiti.spring.boot;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.RepositoryService;
-import org.activiti.engine.impl.persistence.deploy.DefaultDeploymentCache;
-import org.activiti.engine.impl.persistence.deploy.ProcessDefinitionCacheEntry;
 import org.activiti.spring.SpringProcessEngineConfiguration;
+import org.activiti.spring.cache.SpringProcessDefinitionCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource(properties = {"spring.activiti.process-definition-cache-limit=100"})
-public class ProcessDefinitionCacheConfigurationTest {
+@TestPropertySource(properties = {
+    "spring.activiti.caffeine.spec=maximumSize=100, expireAfterAccess=10m, recordStats"
+})
+public class SpringProcessDefinitionCacheConfigurationTest {
 
     @Autowired
     private SpringProcessEngineConfiguration processEngineConfiguration;
@@ -40,10 +42,8 @@ public class ProcessDefinitionCacheConfigurationTest {
     RepositoryService repositoryService;
 
     @Test
-    public void shouldConfigureProcessDefinitionCacheLimit() {
-        assertThat(activitiProperties.getProcessDefinitionCacheLimit()).isEqualTo(100);
-
-        assertThat(processEngineConfiguration.getProcessDefinitionCacheLimit()).isEqualTo(activitiProperties.getProcessDefinitionCacheLimit());
+    public void shouldConfigureProcessDefinitionCacheSpec() {
+        assertThat(activitiProperties.getCaffeine().getSpec()).isEqualTo("maximumSize=100, expireAfterAccess=10m, recordStats");
     }
 
     @Test
@@ -52,10 +52,10 @@ public class ProcessDefinitionCacheConfigurationTest {
     }
 
     @Test
-    public void shouldApplyProcessDefinitionCacheLimit() {
-        var processDefinitionCache = (DefaultDeploymentCache<ProcessDefinitionCacheEntry>) processEngineConfiguration.getProcessDefinitionCache();
+    public void shouldApplyProcessDefinitionCacheSpec() {
+        var springProcessDefinitionCache = (SpringProcessDefinitionCache) processEngineConfiguration.getProcessDefinitionCache();
 
-        assertThat(processDefinitionCache.size()).isEqualTo(100);
+        assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize()).isEqualTo(100);
     }
 
 }
