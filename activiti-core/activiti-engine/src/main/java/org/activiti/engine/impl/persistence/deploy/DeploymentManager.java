@@ -135,12 +135,13 @@ public class DeploymentManager {
     var deploymentOptions = Map.of(RESOURCE_NAMES, List.of(processDefinition.getResourceName()), IS_PROCESS_VALIDATION_ENABLED, false, IS_BPMN20_XSD_VALIDATION_ENABLED, false);
     deployment.setNew(false);
     deploy(deployment, deploymentOptions);
-    ProcessDefinitionCacheEntry cachedProcessDefinition = processDefinitionCache.get(processDefinitionId);
 
-    if (cachedProcessDefinition == null) {
-        throw new ActivitiException("deployment '" + deploymentId + "' didn't put process definition '" + processDefinitionId + "' in the cache");
-    }
-    return cachedProcessDefinition;
+    return deployment
+        .getDeployedArtifacts(ProcessDefinitionCacheEntry.class)
+        .stream()
+        .filter(it -> processDefinitionId.equals(it.getProcessDefinition().getId()))
+        .findFirst()
+        .orElseThrow(() -> new ActivitiException("deployment '" + deploymentId + "' didn't put process definition '" + processDefinitionId + "' in the cache"));
   }
 
   public void removeDeployment(String deploymentId, boolean cascade) {
