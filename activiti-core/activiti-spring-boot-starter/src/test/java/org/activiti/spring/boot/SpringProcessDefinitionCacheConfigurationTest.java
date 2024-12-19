@@ -28,7 +28,8 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(properties = {
-    "spring.activiti.caffeine.spec=maximumSize=100, expireAfterAccess=10m, recordStats"
+    "spring.activiti.process-definition-cache-name=processDefinitions",
+    "activiti.spring.cache-manager.caches.processDefinitions.caffeine.spec=maximumSize=100, expireAfterAccess=10m, recordStats"
 })
 public class SpringProcessDefinitionCacheConfigurationTest {
 
@@ -43,7 +44,7 @@ public class SpringProcessDefinitionCacheConfigurationTest {
 
     @Test
     public void shouldConfigureProcessDefinitionCacheSpec() {
-        assertThat(activitiProperties.getCaffeine().getSpec()).isEqualTo("maximumSize=100, expireAfterAccess=10m, recordStats");
+        assertThat(activitiProperties.getProcessDefinitionCacheName()).isEqualTo("processDefinitions");
     }
 
     @Test

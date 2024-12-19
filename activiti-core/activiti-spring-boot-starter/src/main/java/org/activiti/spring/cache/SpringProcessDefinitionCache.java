@@ -35,12 +35,12 @@ public class SpringProcessDefinitionCache implements DeploymentCache<ProcessDefi
 
     @Override
     public void add(String id, ProcessDefinitionCacheEntry object) {
-        delegate.put(id, object);
+        delegate.putIfAbsent(id, object);
     }
 
     @Override
     public void remove(String id) {
-        delegate.evict(id);
+        delegate.evictIfPresent(id);
     }
 
     @Override

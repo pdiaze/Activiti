@@ -28,7 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(properties = {"spring.activiti.process-definition-cache-limit=100"})
-public class ProcessDefinitionCacheConfigurationTest {
+public class ProcessDefinitionCacheLimitConfigurationTest {
 
     @Autowired
     private SpringProcessEngineConfiguration processEngineConfiguration;

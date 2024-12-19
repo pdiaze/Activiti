@@ -21,7 +21,6 @@ import static java.util.Arrays.asList;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.List;
 import org.activiti.engine.impl.history.HistoryLevel;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -52,7 +51,7 @@ public class ActivitiProperties {
   private boolean serializePOJOsInVariablesToJson = true;
   private String javaClassFieldForJackson = JsonTypeInfo.Id.CLASS.getDefaultPropertyName();
   private Integer processDefinitionCacheLimit;
-  private CacheProperties.Caffeine caffeine;
+  private String processDefinitionCacheName;
 
   public boolean isAsyncExecutorActivate() {
     return asyncExecutorActivate;
@@ -248,11 +247,11 @@ public class ActivitiProperties {
         this.processDefinitionCacheLimit = processDefinitionCacheLimit;
     }
 
-    public CacheProperties.Caffeine getCaffeine() {
-        return caffeine;
+    public String getProcessDefinitionCacheName() {
+        return processDefinitionCacheName;
     }
 
-    public void setCaffeine(CacheProperties.Caffeine caffeine) {
-        this.caffeine = caffeine;
+    public void setProcessDefinitionCacheName(String processDefinitionCacheName) {
+        this.processDefinitionCacheName = processDefinitionCacheName;
     }
 }

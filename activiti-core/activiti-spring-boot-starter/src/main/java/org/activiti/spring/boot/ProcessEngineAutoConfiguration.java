@@ -18,11 +18,11 @@ package org.activiti.spring.boot;
 
 import static java.util.Collections.emptyList;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.activiti.api.process.model.events.ApplicationDeployedEvent;
@@ -69,7 +69,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
-import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -326,11 +326,11 @@ public class ProcessEngineAutoConfiguration extends AbstractProcessEngineAutoCon
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty("spring.activiti.caffeine.spec")
-    public DeploymentCache<ProcessDefinitionCacheEntry> processDefinitionCache(ActivitiProperties properties) {
-        var caffeine = Caffeine.from(properties.getCaffeine().getSpec());
+    @ConditionalOnProperty("spring.activiti.process-definition-cache-name")
+    public DeploymentCache<ProcessDefinitionCacheEntry> springProcessDefinitionCache(ActivitiProperties properties, CacheManager cacheManager) {
+        var delegate = cacheManager.getCache(properties.getProcessDefinitionCacheName());
 
-        return new SpringProcessDefinitionCache(new CaffeineCache("processDefinitionCache", caffeine.build()));
+        return new SpringProcessDefinitionCache(Objects.requireNonNull(delegate));
     }
 
 
