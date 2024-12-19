@@ -16,16 +16,18 @@
 
 package org.activiti.spring.cache.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import com.github.benmanes.caffeine.cache.Scheduler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -77,9 +79,16 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
                 .stream()
                 .filter(it -> it.getValue().isEnabled())
                 .forEach(cacheEntry -> {
-                    Cache<Object, Object> cache = Caffeine.from(cacheEntry.getValue().getCaffeine().getSpec()).build();
+                    Optional.ofNullable(cacheEntry.getValue())
+                        .map(ActivitiSpringCacheManagerProperties.ActivitiCacheProperties::getCaffeine)
+                        .map(CacheProperties.Caffeine::getSpec)
+                        .map(CaffeineSpec::parse)
+                        .map(Caffeine::from)
+                        .ifPresent(caffeine -> {
+                            caffeine.scheduler(Scheduler.systemScheduler());
 
-                    cacheManager.registerCustomCache(cacheEntry.getKey(), cache);
+                            cacheManager.registerCustomCache(cacheEntry.getKey(), caffeine.build());
+                        });
                 });
         };
     }
