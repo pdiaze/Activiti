@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ActivitiSpringCacheManagerProperties {
 
     public enum CacheProvider {
-        none,
+        noop,
         simple,
         caffeine,
     }

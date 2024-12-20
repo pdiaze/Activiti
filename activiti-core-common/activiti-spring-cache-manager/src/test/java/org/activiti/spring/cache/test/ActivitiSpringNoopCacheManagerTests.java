@@ -25,14 +25,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.cache.CacheType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCache;
 import org.springframework.cache.support.NoOpCacheManager;
 
 @SpringBootTest(
     properties = {
         "debug=false",
-        "activiti.spring.cache-manager.provider=none",
+        "activiti.spring.cache-manager.provider=noop",
+        "activiti.spring.cache-manager.caches.foo.enabled=true",
+        "activiti.spring.cache-manager.caches.bar.enabled=false"
 })
-public class ActivitiSpringNoneCacheManagerTests {
+public class ActivitiSpringNoopCacheManagerTests {
 
     @SpringBootApplication
     static class TestApplication {}
@@ -53,6 +56,18 @@ public class ActivitiSpringNoneCacheManagerTests {
     @Test
     void springCacheType() {
         assertThat(springCacheType).isEqualTo(CacheType.NONE);
+    }
+
+    @Test
+    void testCacheNames() {
+        assertThat(cacheManager.getCacheNames()).containsExactly("foo");
+    }
+
+    @Test
+    void testCaches() {
+        var cache = cacheManager.getCache("foo");
+
+        assertThat(cache).isInstanceOf(NoOpCache.class);
     }
 
 }

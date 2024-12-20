@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
@@ -42,6 +43,22 @@ import org.springframework.context.annotation.PropertySource;
 @EnableConfigurationProperties({ActivitiSpringCacheManagerProperties.class})
 @PropertySource("classpath:config/activiti-spring-cache-manager.properties")
 public class ActivitiSpringCacheManagerAutoConfiguration {
+
+    @Bean
+    @ConditionalOnProperty(value = "activiti.spring.cache-manager.provider", havingValue = "noop")
+    public InitializingBean activitiSpringNoopCacheManagerInitializer(
+        ActivitiSpringCacheManagerProperties properties,
+        CacheManager cacheManager
+    ) {
+        return () -> {
+            properties.getCaches()
+                .entrySet()
+                .stream()
+                .filter(it -> it.getValue().isEnabled())
+                .map(Map.Entry::getKey)
+                .forEach(cacheManager::getCache);
+        };
+    }
 
     @Bean
     @ConditionalOnProperty(value = "activiti.spring.cache-manager.provider", havingValue = "simple")
