@@ -109,7 +109,10 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
                         .map(CaffeineSpec::parse)
                         .map(Caffeine::from)
                         .ifPresent(caffeine -> {
-                            caffeine.scheduler(Scheduler.systemScheduler());
+
+                            if (caffeineCacheProperties.isUseSystemScheduler()) {
+                                caffeine.scheduler(Scheduler.systemScheduler());
+                            }
 
                             var cache = customizers
                                 .orderedStream()

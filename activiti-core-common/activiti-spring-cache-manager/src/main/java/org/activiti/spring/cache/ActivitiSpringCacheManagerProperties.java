@@ -102,6 +102,8 @@ public class ActivitiSpringCacheManagerProperties {
     public static class CaffeineCacheProviderProperties {
         private boolean allowNullValues = true;
 
+        private boolean useSystemScheduler = true;
+
         private String defaultSpec = "";
 
         public boolean isAllowNullValues() {
@@ -120,6 +122,13 @@ public class ActivitiSpringCacheManagerProperties {
             this.defaultSpec = defaultSpec;
         }
 
+        public boolean isUseSystemScheduler() {
+            return useSystemScheduler;
+        }
+
+        public void setUseSystemScheduler(boolean useSystemScheduler) {
+            this.useSystemScheduler = useSystemScheduler;
+        }
     }
 
     public static class SimpleCacheProviderProperties {
