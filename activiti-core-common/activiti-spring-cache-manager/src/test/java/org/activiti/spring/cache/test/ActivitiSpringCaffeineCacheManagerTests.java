@@ -18,6 +18,11 @@ package org.activiti.spring.cache.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.ArrayList;
+import java.util.List;
+import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheCustomizer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootTest(
     properties = {
@@ -39,8 +45,28 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 })
 public class ActivitiSpringCaffeineCacheManagerTests {
 
+    private static final List<Caffeine<Object,Object>> caffeineCacheCustomizerList = new ArrayList<>();
+
     @SpringBootApplication
-    static class TestApplication {}
+    static class TestApplication {
+
+        @Bean
+        ActivitiSpringCaffeineCacheCustomizer fooCustomizer() {
+            return new ActivitiSpringCaffeineCacheCustomizer() {
+                @Override
+                public Cache<Object, Object> apply(Caffeine<Object, Object> caffeine) {
+                    caffeineCacheCustomizerList.add(caffeine);
+
+                    return caffeine.build(key -> "bar");
+                }
+
+                @Override
+                public boolean test(String cacheName) {
+                    return "foo".equals(cacheName);
+                }
+            };
+        }
+    }
 
     @Autowired(required = false)
     private CacheManager cacheManager;
@@ -75,6 +101,16 @@ public class ActivitiSpringCaffeineCacheManagerTests {
     @Test
     void springCacheType() {
         assertThat(springCacheType).isEqualTo(CacheType.CAFFEINE);
+    }
+
+    @Test
+    void activitiSpringCaffeineCacheCustomizer() {
+        assertThat(caffeineCacheCustomizerList).hasSize(1);
+
+        var cache = cacheManager.getCache("foo");
+
+        assertThat(cache.get("foo", String.class)).isEqualTo("bar");
+
     }
 
 }

@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
+import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheCustomizer;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
@@ -32,6 +34,7 @@ import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -84,7 +87,10 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
     @Bean
     @ConditionalOnClass(CaffeineCacheManager.class)
     @ConditionalOnProperty(value = "activiti.spring.cache-manager.provider", havingValue = "caffeine")
-    public CacheManagerCustomizer<CaffeineCacheManager> activitiSpringCaffeineCacheManagerCustomizer(ActivitiSpringCacheManagerProperties properties) {
+    public CacheManagerCustomizer<CaffeineCacheManager> activitiSpringCaffeineCacheManagerCustomizer(
+        ActivitiSpringCacheManagerProperties properties,
+        ObjectProvider<ActivitiSpringCaffeineCacheCustomizer> customizers
+    ) {
         return cacheManager -> {
             var caffeineCacheProperties = properties.getCaffeine();
 
@@ -99,12 +105,20 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
                     Optional.ofNullable(cacheEntry.getValue())
                         .map(ActivitiSpringCacheManagerProperties.ActivitiCacheProperties::getCaffeine)
                         .map(CacheProperties.Caffeine::getSpec)
+                        .or(() -> Optional.ofNullable(properties.getCaffeine().getDefaultSpec()))
                         .map(CaffeineSpec::parse)
                         .map(Caffeine::from)
                         .ifPresent(caffeine -> {
                             caffeine.scheduler(Scheduler.systemScheduler());
 
-                            cacheManager.registerCustomCache(cacheEntry.getKey(), caffeine.build());
+                            var cache = customizers
+                                .orderedStream()
+                                .filter(customizer -> customizer.test(cacheEntry.getKey()))
+                                .findFirst()
+                                .map(customizer -> customizer.apply(caffeine))
+                                .orElseGet(caffeine::build);
+
+                            cacheManager.registerCustomCache(cacheEntry.getKey(), cache);
                         });
                 });
         };
