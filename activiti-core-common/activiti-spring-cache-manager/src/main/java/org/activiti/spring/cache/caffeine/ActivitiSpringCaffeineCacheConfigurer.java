@@ -21,6 +21,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface ActivitiSpringCaffeineCacheCustomizer extends Predicate<String>, Function<Caffeine<Object,Object>, Cache<Object, Object>> {
+public interface ActivitiSpringCaffeineCacheConfigurer extends Predicate<String>, Function<Caffeine<Object,Object>, Cache<Object, Object>> {
 
 }

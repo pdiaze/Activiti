@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
-import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheCustomizer;
+import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheConfigurer;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -89,7 +89,7 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
     @ConditionalOnProperty(value = "activiti.spring.cache-manager.provider", havingValue = "caffeine")
     public CacheManagerCustomizer<CaffeineCacheManager> activitiSpringCaffeineCacheManagerCustomizer(
         ActivitiSpringCacheManagerProperties properties,
-        ObjectProvider<ActivitiSpringCaffeineCacheCustomizer> customizers
+        ObjectProvider<ActivitiSpringCaffeineCacheConfigurer> cacheConfigurers
     ) {
         return cacheManager -> {
             var caffeineCacheProperties = properties.getCaffeine();
@@ -114,11 +114,11 @@ public class ActivitiSpringCacheManagerAutoConfiguration {
                                 caffeine.scheduler(Scheduler.systemScheduler());
                             }
 
-                            var cache = customizers
+                            var cache = cacheConfigurers
                                 .orderedStream()
-                                .filter(customizer -> customizer.test(cacheEntry.getKey()))
+                                .filter(configurer -> configurer.test(cacheEntry.getKey()))
                                 .findFirst()
-                                .map(customizer -> customizer.apply(caffeine))
+                                .map(configurer -> configurer.apply(caffeine))
                                 .orElseGet(caffeine::build);
 
                             cacheManager.registerCustomCache(cacheEntry.getKey(), cache);

@@ -22,7 +22,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.ArrayList;
 import java.util.List;
-import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheCustomizer;
+import org.activiti.spring.cache.caffeine.ActivitiSpringCaffeineCacheConfigurer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,17 +45,17 @@ import org.springframework.context.annotation.Bean;
 })
 public class ActivitiSpringCaffeineCacheManagerTests {
 
-    private static final List<Caffeine<Object,Object>> caffeineCacheCustomizerList = new ArrayList<>();
+    private static final List<Caffeine<Object,Object>> caffeineCacheConfigurers = new ArrayList<>();
 
     @SpringBootApplication
     static class TestApplication {
 
         @Bean
-        ActivitiSpringCaffeineCacheCustomizer fooCustomizer() {
-            return new ActivitiSpringCaffeineCacheCustomizer() {
+        ActivitiSpringCaffeineCacheConfigurer fooConfigurer() {
+            return new ActivitiSpringCaffeineCacheConfigurer() {
                 @Override
                 public Cache<Object, Object> apply(Caffeine<Object, Object> caffeine) {
-                    caffeineCacheCustomizerList.add(caffeine);
+                    caffeineCacheConfigurers.add(caffeine);
 
                     return caffeine.build(key -> "bar");
                 }
@@ -104,8 +104,8 @@ public class ActivitiSpringCaffeineCacheManagerTests {
     }
 
     @Test
-    void activitiSpringCaffeineCacheCustomizer() {
-        assertThat(caffeineCacheCustomizerList).hasSize(1);
+    void activitiSpringCaffeineCacheConfigurer() {
+        assertThat(caffeineCacheConfigurers).hasSize(1);
 
         var cache = cacheManager.getCache("foo");
 
